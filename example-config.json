@@ -1,0 +1,87 @@
+{
+  "platform": "AIAgent",
+  "name": "AI Home Agent",
+  "_comment": "Privacy-first AI automation for your home",
+
+  "privacyMode": "strict",
+  "_privacyMode_options": "strict (fully local) | balanced | enhanced",
+
+  "ollamaUrl": "http://192.168.1.180:11434",
+  "_ollamaUrl_note": "Your Mac Mini LLM server",
+
+  "ollamaModel": "llama3.1:8b",
+  "_ollamaModel_options": "llama3.2:3b (faster) | llama3.1:8b (recommended) | mistral:7b",
+
+  "enableAI": true,
+  "aiUsageFrequency": "minimal",
+  "_aiUsageFrequency_options": "minimal (rule-based mostly) | moderate (learn patterns) | frequent (active AI)",
+
+  "apiPort": 8581,
+  "enableWebSocket": true,
+
+  "automation": {
+    "smartLighting": true,
+    "energySaving": true,
+    "securityAlerts": true,
+    "awayModeSimulation": true,
+    "multiSensorFusion": true,
+    "_multiSensorFusion_note": "Requires multiple rear sensors before alerting (reduces false alarms from small animals)"
+  },
+
+  "zoneConfig": [
+    {
+      "_comment": "Example zones - customize these for your home",
+      "name": "Living Room",
+      "floor": "First Floor",
+      "devices": "living room light, living room motion, living room outlet, living room thermostat",
+      "autoLights": true,
+      "autoTemp": true
+    },
+    {
+      "name": "Kitchen",
+      "floor": "First Floor",
+      "devices": "kitchen light, kitchen motion, kitchen outlet",
+      "autoLights": true,
+      "autoTemp": false
+    },
+    {
+      "name": "Master Bedroom",
+      "floor": "Second Floor",
+      "devices": "master light, master motion, master thermostat, master outlet",
+      "autoLights": true,
+      "autoTemp": true
+    },
+    {
+      "name": "Guest Bedroom",
+      "floor": "Second Floor",
+      "devices": "guest light, guest motion",
+      "autoLights": true,
+      "autoTemp": false
+    },
+    {
+      "name": "Basement",
+      "floor": "Basement",
+      "devices": "basement light, basement motion, basement thermostat",
+      "autoLights": true,
+      "autoTemp": true
+    },
+    {
+      "name": "Rear Yard",
+      "floor": "Exterior",
+      "devices": "rear motion 1, rear motion 2, rear motion 3, rear light",
+      "_note": "Multiple motion sensors - multi-sensor fusion will require 2+ to trigger alert",
+      "autoLights": false,
+      "autoTemp": false
+    },
+    {
+      "name": "Front Yard",
+      "floor": "Exterior",
+      "devices": "front motion, front light, driveway motion, driveway light",
+      "autoLights": false,
+      "autoTemp": false
+    }
+  ],
+
+  "debug": false,
+  "_debug_note": "Set to true for detailed logging during setup"
+}

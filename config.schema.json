@@ -1,0 +1,222 @@
+{
+  "pluginAlias": "AIAgent",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "AI Home Agent",
+        "required": true
+      },
+      "privacyMode": {
+        "title": "Privacy Mode",
+        "type": "string",
+        "default": "strict",
+        "oneOf": [
+          { "title": "Strict (Fully Local)", "enum": ["strict"] },
+          { "title": "Balanced (Optional AI)", "enum": ["balanced"] },
+          { "title": "Enhanced (More AI)", "enum": ["enhanced"] }
+        ]
+      },
+      "ollamaUrl": {
+        "title": "Ollama Server URL",
+        "type": "string",
+        "default": "http://localhost:11434"
+      },
+      "ollamaModel": {
+        "title": "Ollama Model",
+        "type": "string",
+        "default": "qwen3:8b"
+      },
+      "enableAI": {
+        "title": "Enable AI Decision Making",
+        "type": "boolean",
+        "default": true
+      },
+      "aiUsageFrequency": {
+        "title": "AI Usage Frequency",
+        "type": "string",
+        "default": "moderate",
+        "oneOf": [
+          { "title": "Minimal (Complex decisions only)", "enum": ["minimal"] },
+          { "title": "Moderate (Learn patterns)", "enum": ["moderate"] },
+          { "title": "Frequent (Active learning)", "enum": ["frequent"] }
+        ]
+      },
+      "homebridgeBackend": {
+        "title": "Homebridge Backend",
+        "type": "string",
+        "default": "auto",
+        "description": "Which API backend to use for device control. 'auto' detects HOOBS (port 80) vs Config UI X (port 8581).",
+        "oneOf": [
+          { "title": "Auto-detect", "enum": ["auto"] },
+          { "title": "Config UI X", "enum": ["configui"] },
+          { "title": "HOOBS", "enum": ["hoobs"] }
+        ]
+      },
+      "homebridgeUiUrl": {
+        "title": "Homebridge / HOOBS URL",
+        "type": "string",
+        "default": "http://localhost:8581",
+        "description": "URL of your Homebridge Config UI X or HOOBS instance"
+      },
+      "homebridgeUiToken": {
+        "title": "Homebridge Config UI X API Token",
+        "type": "string",
+        "description": "API token for authenticating with Config UI X (preferred over username/password)"
+      },
+      "homebridgeUiUsername": {
+        "title": "Homebridge UI Username",
+        "type": "string",
+        "description": "Username for Config UI X (used if no token provided)"
+      },
+      "homebridgeUiPassword": {
+        "title": "Homebridge UI Password",
+        "type": "string",
+        "description": "Password for Config UI X (used if no token provided)"
+      },
+      "apiPort": {
+        "title": "Plugin API Server Port",
+        "type": "integer",
+        "default": 18581,
+        "minimum": 1024,
+        "maximum": 65535
+      },
+      "enableWebSocket": {
+        "title": "Enable WebSocket (for real-time updates)",
+        "type": "boolean",
+        "default": true
+      },
+      "apiToken": {
+        "title": "Plugin API Auth Token",
+        "type": "string",
+        "description": "Bearer token for authenticating with this plugin's REST API. Leave empty to disable auth (local use only)."
+      },
+      "accessoryPollInterval": {
+        "title": "Accessory Poll Interval (seconds)",
+        "type": "integer",
+        "default": 30,
+        "minimum": 10,
+        "maximum": 300,
+        "description": "How often to poll Config UI X for accessory state changes"
+      },
+      "aiAnalysisInterval": {
+        "title": "AI Analysis Interval (seconds)",
+        "type": "integer",
+        "default": 900,
+        "minimum": 60,
+        "maximum": 3600,
+        "description": "How often the AI agent runs pattern analysis"
+      },
+      "automation": {
+        "title": "Automation Settings",
+        "type": "object",
+        "properties": {
+          "smartLighting": {
+            "title": "Enable Smart Lighting",
+            "type": "boolean",
+            "default": true
+          },
+          "energySaving": {
+            "title": "Enable Energy Saving",
+            "type": "boolean",
+            "default": true
+          },
+          "securityAlerts": {
+            "title": "Enable Security Alerts",
+            "type": "boolean",
+            "default": true
+          },
+          "awayModeSimulation": {
+            "title": "Enable Away Mode Light Simulation",
+            "type": "boolean",
+            "default": true
+          },
+          "multiSensorFusion": {
+            "title": "Multi-Sensor Fusion for Alerts",
+            "type": "boolean",
+            "default": true,
+            "description": "Require multiple sensors before alerting (reduces false alarms)"
+          }
+        }
+      },
+      "zoneConfig": {
+        "title": "Zone Configuration",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Zone Name",
+              "type": "string"
+            },
+            "floor": {
+              "title": "Floor",
+              "type": "string"
+            },
+            "devices": {
+              "title": "Device Names (comma separated)",
+              "type": "string"
+            },
+            "autoLights": {
+              "title": "Auto Lights",
+              "type": "boolean",
+              "default": true
+            },
+            "autoTemp": {
+              "title": "Auto Temperature",
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      },
+      "debug": {
+        "title": "Enable Debug Logging",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  "layout": [
+    {
+      "type": "fieldset",
+      "title": "Basic Settings",
+      "expandable": false,
+      "items": ["name", "privacyMode", "debug"]
+    },
+    {
+      "type": "fieldset",
+      "title": "Homebridge UI Integration",
+      "expandable": true,
+      "items": ["homebridgeUiUrl", "homebridgeUiToken", "homebridgeUiUsername", "homebridgeUiPassword"]
+    },
+    {
+      "type": "fieldset",
+      "title": "AI Configuration",
+      "expandable": true,
+      "items": ["enableAI", "ollamaUrl", "ollamaModel", "aiUsageFrequency", "aiAnalysisInterval"]
+    },
+    {
+      "type": "fieldset",
+      "title": "API & Communication",
+      "expandable": true,
+      "items": ["apiPort", "enableWebSocket", "apiToken", "accessoryPollInterval"]
+    },
+    {
+      "type": "fieldset",
+      "title": "Automation Features",
+      "expandable": true,
+      "items": ["automation.smartLighting", "automation.energySaving", "automation.securityAlerts", "automation.awayModeSimulation", "automation.multiSensorFusion"]
+    },
+    {
+      "type": "array",
+      "title": "Zone Configuration",
+      "expandable": true,
+      "items": ["zoneConfig"]
+    }
+  ]
+}

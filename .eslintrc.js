@@ -1,0 +1,36 @@
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
+  ignorePatterns: [
+    'dist',
+    'node_modules',
+  ],
+  rules: {
+    'quotes': ['warn', 'single'],
+    'indent': ['warn', 2, { 'SwitchCase': 1 }],
+    'semi': ['error', 'always'],
+    'comma-dangle': ['warn', 'always-multiline'],
+    'dot-notation': 'off',
+    'eqeqeq': 'warn',
+    'curly': ['warn', 'all'],
+    'brace-style': ['warn'],
+    'prefer-arrow-callback': ['warn'],
+    'max-len': ['warn', 140],
+    'no-console': ['warn'],
+    'no-non-null-assertion': ['off'],
+    'comma-spacing': ['error'],
+    'no-multi-spaces': ['warn'],
+    'no-trailing-spaces': ['warn'],
+    'lines-between-class-members': ['warn', 'always', { 'exceptAfterSingleLine': true }],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
+  },
+};

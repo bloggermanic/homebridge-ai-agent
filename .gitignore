@@ -1,0 +1,24 @@
+node_modules/
+dist/
+*.log
+*.tgz
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build files
+*.js
+*.d.ts
+*.js.map
+!.eslintrc.js
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Data storage (keep private)
+ai-agent-data/
+persist/
