@@ -1,0 +1,17 @@
+node_modules/
+src/
+*.log
+*.tgz
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+coverage/
+.nyc_output/
+ai-agent-data/
+persist/
+tsconfig.json
+.eslintrc.js
+.claude/
