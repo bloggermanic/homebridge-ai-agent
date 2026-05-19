@@ -88,6 +88,11 @@
 
 ## Changelog
 
+### v0.2.3 (2026-05-18)
+
+**Fix**:
+- Fixed npm package missing compiled JavaScript — `.npmignore` now correctly includes `dist/` output
+
 ### v0.2.2 (2026-05-17)
 
 **New Features**:
