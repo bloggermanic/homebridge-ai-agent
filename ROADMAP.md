@@ -88,6 +88,11 @@
 
 ## Changelog
 
+### v0.2.4 (2026-05-18)
+
+**Fix**:
+- Corrected HOOBS plugin installation path (`/var/lib/hoobs/homebridge-ai-agent/` with local `node_modules/`)
+
 ### v0.2.3 (2026-05-18)
 
 **Fix**:
