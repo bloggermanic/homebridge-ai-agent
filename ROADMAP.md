@@ -88,6 +88,11 @@
 
 ## Changelog
 
+### v0.2.5 (2026-05-19)
+
+**Fix**:
+- Handle undefined characteristic/accessory types in HOOBS API responses (null guard in `flattenRoomsToAccessories`)
+
 ### v0.2.4 (2026-05-18)
 
 **Fix**:
