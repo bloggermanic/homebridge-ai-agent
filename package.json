@@ -1,7 +1,7 @@
 {
   "name": "homebridge-ai-agent",
   "displayName": "AI Home Automation Agent",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Privacy-first AI agent for intelligent home automation using local LLM (Ollama)",
   "main": "dist/index.js",
   "scripts": {
