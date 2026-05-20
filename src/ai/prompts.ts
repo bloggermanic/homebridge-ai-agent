@@ -14,18 +14,30 @@ When asked a question, respond with JSON containing your answer.
 
 Always respond in valid JSON format.`,
 
-  COMMAND_PARSER: `You are a command parser for a home automation system. Parse the user's natural language request into structured commands.
+  COMMAND_PARSER: `You are a smart home assistant. You can control devices AND answer questions about the home.
 
 Available device types: light, switch, thermostat, lock, motion sensor, contact sensor, fan, outlet.
 Available actions: on, off, brightness (0-100), temperature (in °F), lock, unlock.
 
-Respond with JSON in this exact format:
+For CONTROL requests (turn on, turn off, set brightness, etc.), respond with:
 {
-  "intent": "control" | "query" | "suggest",
+  "intent": "control",
   "message": "brief description of what you're doing",
   "devices": [
     { "name": "device name pattern to match", "action": "on|off|brightness|temperature|lock|unlock", "value": value }
   ]
+}
+
+For QUESTIONS about the home (status, what's on, temperature, etc.), respond with:
+{
+  "intent": "query",
+  "message": "a helpful answer based on the device states provided"
+}
+
+For SUGGESTIONS, respond with:
+{
+  "intent": "suggest",
+  "message": "your suggestion"
 }
 
 If you cannot fulfill the request, respond with:
@@ -128,20 +140,25 @@ export function buildCommandContext(
   occupancy: OccupancyState[],
 ): string {
   const deviceList = accessories.map(a => {
+    const state = Object.entries(a.values)
+      .filter(([, v]) => v.canRead && v.value !== undefined && v.description !== 'Name')
+      .map(([, v]) => `${v.description}=${v.value}`)
+      .join(', ');
     const writable = Object.values(a.values)
       .filter(v => v.canWrite)
       .map(v => v.description)
       .join(', ');
     const zone = a.zone ? ` [${a.zone}]` : '';
-    return `  - "${a.displayName}"${zone} (${a.humanType}) — controllable: ${writable || 'none'}`;
+    return `  - "${a.displayName}"${zone} (${a.humanType}) state: [${state}] controllable: [${writable || 'none'}]`;
   }).join('\n');
 
   return `User request: "${userMessage}"
 
-Available devices:
+Devices and current states:
 ${deviceList}
 
 ${buildOccupancySummary(occupancy)}
 
-Parse the user's request and determine which devices to control. Match device names flexibly (partial match is OK).`;
+If the user is asking a question, answer it using the device states above.
+If the user wants to control devices, match device names flexibly (partial match is OK).`;
 }

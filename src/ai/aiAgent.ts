@@ -105,6 +105,9 @@ export class AIAgent {
       }
 
       if (result.intent === 'query') {
+        if (result.message && result.message.length > 10) {
+          return { intent: 'query', message: result.message };
+        }
         return this.handleQuery(userMessage);
       }
 

@@ -88,6 +88,14 @@
 
 ## Changelog
 
+### v0.2.7 (2026-05-19)
+
+**Fix**:
+- AI agent now answers questions about home status (was only handling control commands)
+- Command parser prompt updated to handle queries, controls, and suggestions
+- Device context now includes current states (not just writable characteristics)
+- Query responses served in single LLM call when possible (no redundant second call)
+
 ### v0.2.6 (2026-05-19)
 
 **New Features**:
