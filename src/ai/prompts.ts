@@ -139,22 +139,26 @@ export function buildCommandContext(
   accessories: AccessoryInstance[],
   occupancy: OccupancyState[],
 ): string {
+  const keyChars = ['On', 'Brightness', 'CurrentTemperature', 'TargetTemperature',
+    'MotionDetected', 'ContactSensorState', 'LockCurrentState', 'Active',
+    'Current Temperature', 'Target Temperature', 'Motion Detected', 'Contact Sensor State',
+    'Lock Current State', 'Lock Target State'];
+
   const deviceList = accessories.map(a => {
     const state = Object.entries(a.values)
-      .filter(([, v]) => v.canRead && v.value !== undefined && v.description !== 'Name')
+      .filter(([, v]) => v.canRead && v.value !== undefined
+        && v.description !== 'Name'
+        && (keyChars.some(k => k === v.type || k === v.description) || v.canWrite))
       .map(([, v]) => `${v.description}=${v.value}`)
       .join(', ');
-    const writable = Object.values(a.values)
-      .filter(v => v.canWrite)
-      .map(v => v.description)
-      .join(', ');
+    if (!state) return null;
     const zone = a.zone ? ` [${a.zone}]` : '';
-    return `  - "${a.displayName}"${zone} (${a.humanType}) state: [${state}] controllable: [${writable || 'none'}]`;
-  }).join('\n');
+    return `  - "${a.displayName}"${zone} (${a.humanType}): ${state}`;
+  }).filter(Boolean).join('\n');
 
   return `User request: "${userMessage}"
 
-Devices and current states:
+Devices (${accessories.length} total):
 ${deviceList}
 
 ${buildOccupancySummary(occupancy)}

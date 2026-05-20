@@ -75,7 +75,7 @@ export class AIAgentPlatform implements DynamicPlatformPlugin {
     this.ollama = new OllamaClient({
       baseUrl: resolved.ollamaUrl,
       model: resolved.ollamaModel,
-      timeout: 60000,
+      timeout: 120000,
       temperature: 0.3,
     }, resolved.enableAI, log);
 

@@ -88,6 +88,12 @@
 
 ## Changelog
 
+### v0.2.8 (2026-05-19)
+
+**Fix**:
+- Increased Ollama timeout from 60s to 120s (large device lists need more time)
+- Trimmed device context to only key characteristics (On, Brightness, Temperature, Motion, etc.) — reduces prompt size significantly for 100+ device setups
+
 ### v0.2.7 (2026-05-19)
 
 **Fix**:
