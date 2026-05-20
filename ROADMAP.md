@@ -88,6 +88,19 @@
 
 ## Changelog
 
+### v0.2.6 (2026-05-19)
+
+**New Features**:
+- Automatic token refresh for HOOBS cloud auth (Firebase)
+- Plugin authenticates with HOOBS cloud email/password, refreshes token every 50 minutes
+- Falls back to local auth if cloud auth unavailable
+- Auth flow: Firebase sign-in → get idToken + refreshToken → auto-refresh → local API calls
+
+**Technical**:
+- Firebase REST API integration (identitytoolkit.googleapis.com, securetoken.googleapis.com)
+- `HoobsClient.destroy()` cleans up refresh interval on shutdown
+- `HomebridgeClientInterface` now includes optional `destroy()` method
+
 ### v0.2.5 (2026-05-19)
 
 **Fix**:

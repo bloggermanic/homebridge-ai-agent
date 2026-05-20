@@ -6,6 +6,7 @@ export interface HomebridgeClientInterface {
   isAvailable(): Promise<boolean>;
   getAccessories(): Promise<RawAccessory[]>;
   setCharacteristic(uniqueId: string, characteristicType: string, value: unknown): Promise<boolean>;
+  destroy?(): void;
 }
 
 export interface HoobsAuthConfig {
@@ -59,12 +60,35 @@ interface HoobsCharacteristic {
   write: boolean;
 }
 
+const FIREBASE_API_KEY = 'AIzaSyDMLKveJdwqhroHtN83wwt-5pgG4jhZMm0';
+const FIREBASE_SIGN_IN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`;
+const FIREBASE_REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`;
+const TOKEN_REFRESH_INTERVAL = 50 * 60 * 1000; // 50 minutes (tokens expire at 60)
+
+interface FirebaseSignInResponse {
+  idToken: string;
+  refreshToken: string;
+  expiresIn: string;
+  localId: string;
+  email: string;
+}
+
+interface FirebaseRefreshResponse {
+  id_token: string;
+  refresh_token: string;
+  expires_in: string;
+  token_type: string;
+  user_id: string;
+}
+
 export class HoobsClient implements HomebridgeClientInterface {
   private url: string;
   private token: string | null;
   private username?: string;
   private password?: string;
   private log: Logger;
+  private refreshToken: string | null = null;
+  private refreshInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: HoobsAuthConfig, log: Logger) {
     this.url = config.url.replace(/\/$/, '');
@@ -77,11 +101,19 @@ export class HoobsClient implements HomebridgeClientInterface {
   async authenticate(): Promise<boolean> {
     if (this.token) {
       const valid = await this.validateToken();
-      if (valid) return true;
+      if (valid) {
+        this.log.info('HOOBS: Static token is valid');
+        return true;
+      }
     }
 
     if (this.username && this.password) {
-      return this.login();
+      const success = await this.firebaseLogin();
+      if (success) {
+        this.startTokenRefresh();
+        return true;
+      }
+      return this.localLogin();
     }
 
     this.log.warn('HOOBS: No valid authentication method configured');
@@ -102,7 +134,77 @@ export class HoobsClient implements HomebridgeClientInterface {
     }
   }
 
-  private async login(): Promise<boolean> {
+  private async firebaseLogin(): Promise<boolean> {
+    try {
+      this.log.info('HOOBS: Authenticating via Firebase cloud auth...');
+      const response = await fetch(FIREBASE_SIGN_IN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: this.username,
+          password: this.password,
+          returnSecureToken: true,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        const err = await response.json() as { error?: { message?: string } };
+        this.log.warn(`HOOBS: Firebase auth failed: ${err.error?.message || response.status}`);
+        return false;
+      }
+
+      const data = await response.json() as FirebaseSignInResponse;
+      this.token = data.idToken;
+      this.refreshToken = data.refreshToken;
+      this.log.info('HOOBS: Firebase cloud auth successful');
+      return true;
+    } catch (error) {
+      this.log.warn('HOOBS: Firebase auth error (will try local login):', error);
+      return false;
+    }
+  }
+
+  private async refreshFirebaseToken(): Promise<boolean> {
+    if (!this.refreshToken) return false;
+
+    try {
+      const response = await fetch(FIREBASE_REFRESH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(this.refreshToken)}`,
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        this.log.warn(`HOOBS: Token refresh failed: ${response.status}`);
+        return false;
+      }
+
+      const data = await response.json() as FirebaseRefreshResponse;
+      this.token = data.id_token;
+      this.refreshToken = data.refresh_token;
+      this.log.debug('HOOBS: Token refreshed successfully');
+      return true;
+    } catch (error) {
+      this.log.error('HOOBS: Token refresh error:', error);
+      return false;
+    }
+  }
+
+  private startTokenRefresh(): void {
+    if (this.refreshInterval) clearInterval(this.refreshInterval);
+
+    this.refreshInterval = setInterval(async () => {
+      const success = await this.refreshFirebaseToken();
+      if (!success) {
+        this.log.warn('HOOBS: Refresh failed, attempting full re-login');
+        await this.firebaseLogin();
+      }
+    }, TOKEN_REFRESH_INTERVAL);
+  }
+
+  private async localLogin(): Promise<boolean> {
     try {
       const response = await fetch(`${this.url}/api/auth/logon`, {
         method: 'POST',
@@ -116,22 +218,29 @@ export class HoobsClient implements HomebridgeClientInterface {
       });
 
       if (!response.ok) {
-        this.log.error(`HOOBS login failed: ${response.status}`);
+        this.log.error(`HOOBS local login failed: ${response.status}`);
         return false;
       }
 
       const data = await response.json() as { token: string | false; error?: string };
       if (!data.token) {
-        this.log.error(`HOOBS login failed: ${data.error || 'Invalid credentials'}`);
+        this.log.error(`HOOBS local login failed: ${data.error || 'Invalid credentials'}`);
         return false;
       }
 
       this.token = data.token;
-      this.log.info('HOOBS: Authenticated successfully');
+      this.log.info('HOOBS: Local auth successful');
       return true;
     } catch (error) {
-      this.log.error('HOOBS login error:', error);
+      this.log.error('HOOBS local login error:', error);
       return false;
+    }
+  }
+
+  destroy(): void {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = null;
     }
   }
 

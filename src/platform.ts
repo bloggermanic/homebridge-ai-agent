@@ -109,6 +109,7 @@ export class AIAgentPlatform implements DynamicPlatformPlugin {
       this.aiAgent.destroy();
       this.ruleEngine.destroy();
       this.registry.destroy();
+      this.homebridgeClient.destroy?.();
       this.apiServer.close();
       await this.dataStore.destroy();
     });
